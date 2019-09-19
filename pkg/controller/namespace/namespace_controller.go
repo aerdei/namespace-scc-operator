@@ -105,10 +105,10 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 	// Check if this SCC already exists
 	reqLogger.Info("Check if this SCC already exists")
 	sccfound := &securityv1.SecurityContextConstraints{}
-	err = r.client.Get(context.TODO(), client.ObjectKey{Name: "mapr-scc-" + instance.Name}, sccfound)
+	err = r.client.Get(context.TODO(), client.ObjectKey{Name: "mapr-" + instance.Name}, sccfound)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new SCC object
-		reqLogger.Info(err.Error(), "name", "mapr-scc-"+instance.Name, "namespace", instance.Namespace)
+		reqLogger.Info(err.Error(), "name", "mapr-"+instance.Name, "namespace", instance.Namespace)
 		reqLogger.Info("Define a new SCC object")
 		scc := r.newSCCForNS(instance)
 		reqLogger.Info("Creating a new SCC")
