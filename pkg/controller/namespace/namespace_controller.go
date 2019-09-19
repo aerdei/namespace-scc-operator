@@ -138,6 +138,7 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 		"namespace": cr.Name,
 	}
 	var uid int64 = 908000261
+	var prio int32 = 42
 	scc := &securityv1.SecurityContextConstraints{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   "mapr-" + cr.Name,
@@ -148,6 +149,7 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 		AllowHostPorts:           false,
 		AllowHostPID:             false,
 		AllowHostIPC:             false,
+		Priority:                 &prio,
 		FSGroup: securityv1.FSGroupStrategyOptions{
 			Type: securityv1.FSGroupStrategyMustRunAs,
 			Ranges: []securityv1.IDRange{
