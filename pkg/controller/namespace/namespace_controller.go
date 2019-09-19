@@ -85,51 +85,52 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling Namespace")
 
-	// Fetch the Namespace instance
+	// Fetch the MapRScc instance
+	reqLogger.Info("Fetch the Namespace instance")
 	instance := &corev1.Namespace{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
+			reqLogger.Info("Request object not found")
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		return reconcile.Result{}, err
+		reqLogger.Info("Error reading the object - requeue the request.")
+		//return reconcile.Result{}, err
 	}
 
-	// Define a new Pod object
-	pod := newPodForCR(instance)
-
-	// Set Namespace instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// Check if this Pod already exists
-	found := &corev1.Pod{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
+	// Check if this SCC already exists
+	reqLogger.Info("Check if this SCC already exists")
+	sccfound := &securityv1.SecurityContextConstraints{}
+	err = r.client.Get(context.TODO(), client.ObjectKey{Name: "mapr-scc-" + instance.Name}, sccfound)
 	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
-		err = r.client.Create(context.TODO(), pod)
+		// Define a new SCC object
+		reqLogger.Info(err.Error(), "name", "mapr-scc-"+instance.Name, "namespace", instance.Namespace)
+		reqLogger.Info("Define a new SCC object")
+		scc := r.newSCCForNS(instance)
+		reqLogger.Info("Creating a new SCC")
+		err = r.client.Create(context.TODO(), scc)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-
-		// Pod created successfully - don't requeue
-		return reconcile.Result{}, nil
+		// SCC created successfully - don't requeue
+		reqLogger.Info("SCC created successfully - don't requeue")
+		//return reconcile.Result{}, nil
 	} else if err != nil {
+		reqLogger.Info("SCC get error - requeue")
 		return reconcile.Result{}, err
 	}
 
-	// Pod already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
+	// Objects already exist - don't requeue
+	reqLogger.Info("Skip reconcile: objects already exist")
 	return reconcile.Result{}, nil
 }
 
 // newSCCForNS returns an SCC with the name mapr-{namespace}
-func (r *ReconcileMapRScc) newSCCForNS(cr *corev1.Namespace) *securityv1.SecurityContextConstraints {
+func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.SecurityContextConstraints {
 	labels := map[string]string{
 		"namespace": cr.Name,
 	}
