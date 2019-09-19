@@ -3,6 +3,7 @@ package namespace
 import (
 	"context"
 
+	securityv1 "github.com/openshift/api/security/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -127,25 +128,66 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 	return reconcile.Result{}, nil
 }
 
-// newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *corev1.Namespace) *corev1.Pod {
+// newSCCForNS returns an SCC with the name mapr-{namespace}
+func (r *ReconcileMapRScc) newSCCForNS(cr *corev1.Namespace) *securityv1.SecurityContextConstraints {
 	labels := map[string]string{
-		"app": cr.Name,
+		"namespace": cr.Name,
 	}
-	return &corev1.Pod{
+	var uid int64 = 908000261
+
+	scc := &securityv1.SecurityContextConstraints{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-pod",
-			Namespace: cr.Namespace,
-			Labels:    labels,
+			Name:   "mapr-" + cr.Name,
+			Labels: labels,
 		},
-		Spec: corev1.PodSpec{
-			Containers: []corev1.Container{
-				{
-					Name:    "busybox",
-					Image:   "busybox",
-					Command: []string{"sleep", "3600"},
+		AllowPrivilegedContainer: false,
+		AllowHostNetwork:         false,
+		AllowHostPorts:           false,
+		AllowHostPID:             false,
+		AllowHostIPC:             false,
+		FSGroup: securityv1.FSGroupStrategyOptions{
+			Type: securityv1.FSGroupStrategyMustRunAs,
+			Ranges: []securityv1.IDRange{
+				securityv1.IDRange{
+					Min: 908000261,
+					Max: 908000262,
 				},
 			},
 		},
+		ReadOnlyRootFilesystem: false,
+		RequiredDropCapabilities: []corev1.Capability{
+			"KILL",
+			"MKNOD",
+			"SETUID",
+			"SETGID",
+		},
+		RunAsUser: securityv1.RunAsUserStrategyOptions{
+			Type: securityv1.RunAsUserStrategyMustRunAs,
+			UID:  &uid,
+		},
+		SELinuxContext: securityv1.SELinuxContextStrategyOptions{
+			Type: securityv1.SELinuxStrategyMustRunAs,
+		},
+		SupplementalGroups: securityv1.SupplementalGroupsStrategyOptions{
+			Type: securityv1.SupplementalGroupsStrategyRunAsAny,
+			Ranges: []securityv1.IDRange{
+				securityv1.IDRange{
+					Min: 908000261,
+					Max: 908000262,
+				},
+			},
+		},
+		Volumes: []securityv1.FSType{
+			securityv1.FSTypeConfigMap,
+			securityv1.FSTypeDownwardAPI,
+			securityv1.FSTypeEmptyDir,
+			securityv1.FSTypePersistentVolumeClaim,
+			securityv1.FSTypeSecret,
+			securityv1.FSProjected,
+		},
+		Users:  []string{"system:serviceaccount:" + cr.Name + ":default"},
+		Groups: []string{"mapr-sas"},
 	}
+	controllerutil.SetControllerReference(cr, scc, r.scheme)
+	return scc
 }
