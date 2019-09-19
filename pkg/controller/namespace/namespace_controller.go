@@ -82,24 +82,28 @@ type ReconcileNamespace struct {
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger := log.WithValues("Request.Name", request.Name)
 	reqLogger.Info("Reconciling Namespace")
 
 	// Fetch the MapRScc instance
 	reqLogger.Info("Fetch the Namespace instance")
 	instance := &corev1.Namespace{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, instance)
+	if instance.ObjectMeta.Labels["usernamespace"] != "true" {
+		reqLogger.Info("Namespace does not need an SCC - not requeuing")
+		return reconcile.Result{}, nil
+	}
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			reqLogger.Info("Request object not found")
+			reqLogger.Info("Request object not found - not requeuing")
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		reqLogger.Info("Error reading the object - requeue the request.")
-		//return reconcile.Result{}, err
+		reqLogger.Info("Error reading the object - requeueing request")
+		return reconcile.Result{}, err
 	}
 
 	// Check if this SCC already exists
@@ -108,8 +112,8 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 	err = r.client.Get(context.TODO(), client.ObjectKey{Name: "mapr-" + instance.Name}, sccfound)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new SCC object
-		reqLogger.Info(err.Error(), "name", "mapr-"+instance.Name, "namespace", instance.Namespace)
-		reqLogger.Info("Define a new SCC object")
+		reqLogger.Info(err.Error(), "name", "mapr-"+instance.Name)
+		reqLogger.Info("Defining a new SCC object")
 		scc := r.newSCCForNS(instance)
 		reqLogger.Info("Creating a new SCC")
 		err = r.client.Create(context.TODO(), scc)
@@ -117,15 +121,14 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 			return reconcile.Result{}, err
 		}
 		// SCC created successfully - don't requeue
-		reqLogger.Info("SCC created successfully - don't requeue")
+		reqLogger.Info("SCC created successfully - not requeuing")
 		//return reconcile.Result{}, nil
 	} else if err != nil {
-		reqLogger.Info("SCC get error - requeue")
+		reqLogger.Info("SCC get error - requeueing")
 		return reconcile.Result{}, err
 	}
-
 	// Objects already exist - don't requeue
-	reqLogger.Info("Skip reconcile: objects already exist")
+	reqLogger.Info("Skipping reconcile: objects already exist")
 	return reconcile.Result{}, nil
 }
 
@@ -135,7 +138,6 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 		"namespace": cr.Name,
 	}
 	var uid int64 = 908000261
-
 	scc := &securityv1.SecurityContextConstraints{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   "mapr-" + cr.Name,
