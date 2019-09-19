@@ -1,6 +1,7 @@
 module github.com/aerdei/namespace-scc-operator
 
 require (
+	github.com/openshift/api v3.9.0+incompatible
 	github.com/operator-framework/operator-sdk v0.10.1-0.20190917191403-5f663690a3bb
 	github.com/spf13/pflag v1.0.3
 	k8s.io/api v0.0.0-20190612125737-db0771252981
