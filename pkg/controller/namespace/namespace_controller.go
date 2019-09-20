@@ -23,11 +23,6 @@ import (
 
 var log = logf.Log.WithName("controller_namespace")
 
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
-
 // Add creates a new Namespace Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
@@ -78,11 +73,6 @@ type ReconcileNamespace struct {
 
 // Reconcile reads that state of the cluster for a Namespace object and makes changes based on the state read
 // and what is in the Namespace.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
-// Note:
-// The Controller will requeue the Request to be processed again if the returned error is non-nil or
-// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Name", request.Name)
 	reqLogger.Info("Reconciling Namespace")
@@ -108,18 +98,16 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 		return reconcile.Result{}, err
 	}
 
+	// Reconcile SCC
 	reqLogger.Info("Defining a new SCC object")
 	scc := r.newSCCForNS(instance)
-	// Check if this SCC already exists
-	reqLogger.Info("Check if this SCC already exists")
+	reqLogger.Info("Checking if this SCC already exists")
+	// Get the SCC instance
 	sccfound := &securityv1.SecurityContextConstraints{}
 	err = r.client.Get(context.TODO(), client.ObjectKey{Name: "mapr-" + instance.Name}, sccfound)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new SCC object
-		reqLogger.Info(err.Error(), "name", "mapr-"+instance.Name)
-		//reqLogger.Info("Defining a new SCC object")
-		//scc := r.newSCCForNS(instance)
-		reqLogger.Info("Creating a new SCC")
+		reqLogger.Info("SCC not found - reating a new SCC")
 		err = r.client.Create(context.TODO(), scc)
 		if err != nil {
 			return reconcile.Result{}, err
@@ -130,7 +118,7 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 	} else if err != nil {
 		reqLogger.Info("SCC get error - requeueing")
 		return reconcile.Result{}, err
-	} else if err == nil && !equalSCCs(sccfound, scc) {
+	} else if !equalSCCs(sccfound, scc) {
 		reqLogger.Info("SCC mismatch - updating")
 		sccfound = scc
 		err = r.client.Update(context.TODO(), sccfound)
@@ -140,6 +128,7 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 		}
 		return reconcile.Result{}, nil
 	}
+
 	// Objects already exist - don't requeue
 	reqLogger.Info("Skipping reconcile: objects already exist")
 	return reconcile.Result{}, nil
@@ -210,6 +199,7 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 	return scc
 }
 
+// newSCCForNS only returns true if all fields except TypeMeta and ObjectMeta in sccfound and scc are equal
 func equalSCCs(sccfound *securityv1.SecurityContextConstraints, scc *securityv1.SecurityContextConstraints) bool {
 	return (cmp.Equal(sccfound, scc, cmpopts.IgnoreFields(securityv1.SecurityContextConstraints{}, "TypeMeta", "ObjectMeta")))
 }
