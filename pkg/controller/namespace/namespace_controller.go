@@ -3,6 +3,8 @@ package namespace
 import (
 	"context"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	securityv1 "github.com/openshift/api/security/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -106,6 +108,8 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 		return reconcile.Result{}, err
 	}
 
+	reqLogger.Info("Defining a new SCC object")
+	scc := r.newSCCForNS(instance)
 	// Check if this SCC already exists
 	reqLogger.Info("Check if this SCC already exists")
 	sccfound := &securityv1.SecurityContextConstraints{}
@@ -113,8 +117,8 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new SCC object
 		reqLogger.Info(err.Error(), "name", "mapr-"+instance.Name)
-		reqLogger.Info("Defining a new SCC object")
-		scc := r.newSCCForNS(instance)
+		//reqLogger.Info("Defining a new SCC object")
+		//scc := r.newSCCForNS(instance)
 		reqLogger.Info("Creating a new SCC")
 		err = r.client.Create(context.TODO(), scc)
 		if err != nil {
@@ -122,10 +126,19 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 		}
 		// SCC created successfully - don't requeue
 		reqLogger.Info("SCC created successfully - not requeuing")
-		//return reconcile.Result{}, nil
+		return reconcile.Result{}, nil
 	} else if err != nil {
 		reqLogger.Info("SCC get error - requeueing")
 		return reconcile.Result{}, err
+	} else if err == nil && !equalSCCs(sccfound, scc) {
+		reqLogger.Info("SCC mismatch - updating")
+		sccfound = scc
+		err = r.client.Update(context.TODO(), sccfound)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update SCC")
+			return reconcile.Result{}, err
+		}
+		return reconcile.Result{}, nil
 	}
 	// Objects already exist - don't requeue
 	reqLogger.Info("Skipping reconcile: objects already exist")
@@ -187,12 +200,16 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 			securityv1.FSTypeDownwardAPI,
 			securityv1.FSTypeEmptyDir,
 			securityv1.FSTypePersistentVolumeClaim,
-			securityv1.FSTypeSecret,
 			securityv1.FSProjected,
+			securityv1.FSTypeSecret,
 		},
 		Users:  []string{"system:serviceaccount:" + cr.Name + ":default"},
 		Groups: []string{"mapr-sas"},
 	}
 	controllerutil.SetControllerReference(cr, scc, r.scheme)
 	return scc
+}
+
+func equalSCCs(sccfound *securityv1.SecurityContextConstraints, scc *securityv1.SecurityContextConstraints) bool {
+	return (cmp.Equal(sccfound, scc, cmpopts.IgnoreFields(securityv1.SecurityContextConstraints{}, "TypeMeta", "ObjectMeta")))
 }
