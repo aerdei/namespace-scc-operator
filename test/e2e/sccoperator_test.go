@@ -67,11 +67,6 @@ func sccHandlingTest(t *testing.T, f *framework.Framework, ctx *framework.TestCt
 
 	// get the scc to see if it was created
 	scc := &securityv1.SecurityContextConstraints{}
-
-	if err != nil {
-		return err
-	}
-
 	err = wait.Poll(retryInterval, timeout, func() (done bool, err error) {
 		err = f.Client.Get(goctx.TODO(), types.NamespacedName{Name: "mapr-example-scc-op-test", Namespace: ""}, scc)
 		if err != nil {
