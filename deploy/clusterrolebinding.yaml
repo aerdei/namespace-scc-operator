@@ -2,11 +2,8 @@ apiVersion: authorization.openshift.io/v1
 groupNames: null
 kind: ClusterRoleBinding
 metadata:
-  creationTimestamp: 2019-10-11T10:54:43Z
   name: namespace-scc-operator
-  resourceVersion: "23878059"
   selfLink: /apis/authorization.openshift.io/v1/clusterrolebindings/namespace-scc-operator
-  uid: 880509bf-ec15-11e9-bc53-f2a8f0e00054
 roleRef:
   name: namespace-scc-operator
 subjects:
