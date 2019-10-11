@@ -1,0 +1,38 @@
+apiVersion: authorization.openshift.io/v1
+kind: ClusterRole
+metadata:
+  name: namespace-scc-operator
+  selfLink: /apis/authorization.openshift.io/v1/clusterroles/namespace-scc-operator
+rules:
+- apiGroups:
+  - ""
+  attributeRestrictions: null
+  resources:
+  - configmaps
+  - namespaces
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  attributeRestrictions: null
+  resources:
+  - namespaces/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  attributeRestrictions: null
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - security.openshift.io
+  attributeRestrictions: null
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - '*'
