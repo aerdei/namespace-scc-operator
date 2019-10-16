@@ -81,10 +81,6 @@ func (r *ReconcileNamespace) Reconcile(request reconcile.Request) (reconcile.Res
 	reqLogger.Info("Fetch the Namespace instance")
 	instance := &corev1.Namespace{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, instance)
-	if instance.ObjectMeta.Labels["usernamespace"] != "true" {
-		reqLogger.Info("Namespace does not need an SCC - not requeuing")
-		return reconcile.Result{}, nil
-	}
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
