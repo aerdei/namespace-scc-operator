@@ -2,20 +2,14 @@ module github.com/aerdei/namespace-scc-operator
 
 require (
 	github.com/NYTimes/gziphandler v1.0.1 // indirect
-	github.com/cosiner/argv v0.0.1 // indirect
-	github.com/go-delve/delve v1.3.1 // indirect
 	github.com/google/go-cmp v0.2.0
-	github.com/mattn/go-colorable v0.1.2 // indirect
-	github.com/mattn/go-isatty v0.0.9 // indirect
-	github.com/mattn/go-runewidth v0.0.4 // indirect
+	github.com/onsi/ginkgo v1.8.0 // indirect
+	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/operator-framework/operator-sdk v0.10.1-0.20190917191403-5f663690a3bb
-	github.com/peterh/liner v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/spf13/pflag v1.0.5
-	go.starlark.net v0.0.0-20190919145610-979af19b165c // indirect
-	golang.org/x/arch v0.0.0-20190919213554-7fe50f7625bd // indirect
 	golang.org/x/sys v0.0.0-20190919044723-0c1ff786ef13 // indirect
 	k8s.io/api v0.0.0-20190612125737-db0771252981
 	k8s.io/apimachinery v0.0.0-20190612125636-6a5db36e93ad
