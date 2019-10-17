@@ -1,6 +1,7 @@
 module github.com/aerdei/namespace-scc-operator
 
 require (
+	github.com/NYTimes/gziphandler v1.0.1 // indirect
 	github.com/cosiner/argv v0.0.1 // indirect
 	github.com/go-delve/delve v1.3.1 // indirect
 	github.com/google/go-cmp v0.2.0
