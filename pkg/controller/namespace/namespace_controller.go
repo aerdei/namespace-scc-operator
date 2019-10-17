@@ -166,7 +166,7 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 			Ranges: []securityv1.IDRange{
 				securityv1.IDRange{
 					Min: storageUID,
-					Max: storageUID + 1,
+					Max: storageUID,
 				},
 			},
 		},
@@ -189,7 +189,7 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 			Ranges: []securityv1.IDRange{
 				securityv1.IDRange{
 					Min: storageUID,
-					Max: storageUID + 1,
+					Max: storageUID,
 				},
 			},
 		},
