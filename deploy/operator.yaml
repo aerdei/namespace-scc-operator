@@ -36,6 +36,8 @@ spec:
       containers:
       - env:
         - name: WATCH_NAMESPACE
+        - name: STORAGE_UID
+          value: ""
         - name: POD_NAME
           valueFrom:
             fieldRef:

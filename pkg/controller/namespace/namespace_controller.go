@@ -2,6 +2,9 @@ package namespace
 
 import (
 	"context"
+	goerr "errors"
+	"os"
+	"strconv"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -21,7 +24,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_namespace")
+var (
+	log        = logf.Log.WithName("controller_namespace")
+	storageUID int64
+)
 
 // Add creates a new Namespace Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -57,6 +63,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	storageUIDString := os.Getenv("STORAGE_UID")
+	if storageUIDString == "" {
+		return goerr.New("STORAGE_UID not defined")
+	}
+	storageUID, err = strconv.ParseInt(storageUIDString, 10, 64)
+	if err != nil {
+		return goerr.New("Failed to set up STORAGE_UID")
+	}
 	return nil
 }
 
@@ -135,7 +149,6 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 	labels := map[string]string{
 		"namespace": cr.Name,
 	}
-	var uid int64 = 908000261
 	var prio int32 = 42
 	scc := &securityv1.SecurityContextConstraints{
 		ObjectMeta: metav1.ObjectMeta{
@@ -152,8 +165,8 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 			Type: securityv1.FSGroupStrategyMustRunAs,
 			Ranges: []securityv1.IDRange{
 				securityv1.IDRange{
-					Min: 908000261,
-					Max: 908000262,
+					Min: storageUID,
+					Max: storageUID,
 				},
 			},
 		},
@@ -166,7 +179,7 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 		},
 		RunAsUser: securityv1.RunAsUserStrategyOptions{
 			Type: securityv1.RunAsUserStrategyMustRunAs,
-			UID:  &uid,
+			UID:  &storageUID,
 		},
 		SELinuxContext: securityv1.SELinuxContextStrategyOptions{
 			Type: securityv1.SELinuxStrategyMustRunAs,
@@ -175,8 +188,8 @@ func (r *ReconcileNamespace) newSCCForNS(cr *corev1.Namespace) *securityv1.Secur
 			Type: securityv1.SupplementalGroupsStrategyRunAsAny,
 			Ranges: []securityv1.IDRange{
 				securityv1.IDRange{
-					Min: 908000261,
-					Max: 908000262,
+					Min: storageUID,
+					Max: storageUID,
 				},
 			},
 		},
