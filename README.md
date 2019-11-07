@@ -1,7 +1,7 @@
 ## namespace-scc-operator
 This operator will create a pre-defined SCC with a few configurable fields for every namespace that is not present in the whitelist.  
 The SCCs will be named `<namespacescc>-<namespace>`  
-Multiple `namespacesccs` can be created with different values. They will result in new SCCs created for each namespace not on the whitelist.  
+Multiple `namespacesccs` can be created with different values. They will result in new SCCs being created for each namespace not on the whitelist.  
 The owner of the created SCC is the corresponding namespace. An SCC gets garbage collected if the namespace is deleted.
 ```yaml 
 apiVersion: namespacescc.github.com/v1alpha1
@@ -17,7 +17,7 @@ spec:
 ```
 `uuid`: The UUID the SCC will be configured with  
 `sccPriority`: the priority the SCC will be configured with  
-`whiteList`: no SCC will be created for the namespaces with names in the list  
+`whiteList`: no SCC will be created for the namespaces in the list  
 ## Prerequisites  
 * docker/podman
 * [operator-sdk v0.10.1](https://github.com/operator-framework/operator-sdk/releases/tag/v0.10.1)
