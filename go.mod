@@ -5,7 +5,9 @@ go 1.13
 require (
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-openapi/spec v0.19.0
+	github.com/google/go-cmp v0.3.0
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
+	github.com/openshift/api v3.9.1-0.20190424152011-77b8897ec79a+incompatible
 	github.com/operator-framework/operator-sdk v0.12.0
 	github.com/spf13/pflag v1.0.3
 	google.golang.org/genproto v0.0.0-20181016170114-94acd270e44e // indirect
