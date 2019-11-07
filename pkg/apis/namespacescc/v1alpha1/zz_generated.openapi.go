@@ -78,7 +78,7 @@ func schema_pkg_apis_namespacescc_v1alpha1_NamespaceSCCSpec(ref common.Reference
 					"sccPriority": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"integer"},
-							Format: "int64",
+							Format: "int32",
 						},
 					},
 					"whiteList": {

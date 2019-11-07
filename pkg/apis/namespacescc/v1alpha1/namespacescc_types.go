@@ -14,7 +14,7 @@ type NamespaceSCCSpec struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 	UUID        int64 `json:"uuid"`
-	SccPriority int64 `json:"sccPriority"`
+	SccPriority int32 `json:"sccPriority"`
 	// +listType=set
 	WhiteList []string `json:"whiteList"`
 }

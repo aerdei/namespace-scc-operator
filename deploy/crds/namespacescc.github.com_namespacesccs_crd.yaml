@@ -32,7 +32,7 @@ spec:
           description: NamespaceSCCSpec defines the desired state of NamespaceSCC
           properties:
             sccPriority:
-              format: int64
+              format: int32
               type: integer
             uuid:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
