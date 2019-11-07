@@ -69,7 +69,7 @@ metadata:
     blockOwnerDeletion: true
     controller: true
     kind: Namespace
-    name: <project>
+    name: <namespace>
 priority: <sccPriority>
 readOnlyRootFilesystem: false
 requiredDropCapabilities:
