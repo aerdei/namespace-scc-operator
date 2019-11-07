@@ -4,6 +4,6 @@ metadata:
   name: example-namespacescc
 spec:
   uuid: "24812422"
-  sccPriority: "22"
+  sccPriority: 22
   whiteList:
   - "default"

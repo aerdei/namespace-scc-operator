@@ -2,6 +2,7 @@ package namespacescc
 
 import (
 	"context"
+	"fmt"
 
 	namespacesccv1alpha1 "github.com/aerdei/namespace-scc-operator/pkg/apis/namespacescc/v1alpha1"
 	"github.com/google/go-cmp/cmp"
@@ -100,11 +101,14 @@ func (r *ReconcileNamespaceSCC) Reconcile(request reconcile.Request) (reconcile.
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
+			reqLogger.Info("Object not found")
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
+		reqLogger.Info("Error reading the object")
 		return reconcile.Result{}, err
 	}
+	//reqLogger.Info(fmt.Sprintf("%s", sccList))
 
 	// Fetch the Namespace list
 	nsList := &corev1.NamespaceList{}
@@ -113,14 +117,20 @@ func (r *ReconcileNamespaceSCC) Reconcile(request reconcile.Request) (reconcile.
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
+			reqLogger.Info("Object not found")
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
+		reqLogger.Info("Error reading the object")
 		return reconcile.Result{}, err
 	}
+	//reqLogger.Info(fmt.Sprintf("%s", nsList))
+
 	// For every SCC, check if every namespace has a corresponding scc. If not, create one. If present but differs, update.
 	for _, sccElement := range sccList.Items {
+		reqLogger.Info(fmt.Sprintf("Cheking SCC %s", sccElement))
 		for _, nsElement := range nsList.Items {
+			reqLogger.Info(fmt.Sprintf("Cheking NS %s", nsElement))
 			whiteListedNamespace := false
 			for _, whiteListed := range sccElement.Spec.WhiteList {
 				if nsElement.Name == whiteListed {
@@ -169,6 +179,9 @@ func (r *ReconcileNamespaceSCC) newSCCForNS(cr *namespacesccv1alpha1.NamespaceSC
 	labels := map[string]string{
 		"namespace": ns.Name,
 	}
+	priority := int32(cr.Spec.SccPriority)
+	uuid := int64(cr.Spec.UUID)
+
 	scc := &securityv1.SecurityContextConstraints{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   "mapr-" + ns.Name,
@@ -179,13 +192,13 @@ func (r *ReconcileNamespaceSCC) newSCCForNS(cr *namespacesccv1alpha1.NamespaceSC
 		AllowHostPorts:           false,
 		AllowHostPID:             false,
 		AllowHostIPC:             false,
-		Priority:                 &cr.Spec.SccPriority,
+		Priority:                 &priority,
 		FSGroup: securityv1.FSGroupStrategyOptions{
 			Type: securityv1.FSGroupStrategyMustRunAs,
 			Ranges: []securityv1.IDRange{
 				securityv1.IDRange{
-					Min: cr.Spec.UUID,
-					Max: cr.Spec.UUID,
+					Min: uuid,
+					Max: uuid,
 				},
 			},
 		},
@@ -198,7 +211,7 @@ func (r *ReconcileNamespaceSCC) newSCCForNS(cr *namespacesccv1alpha1.NamespaceSC
 		},
 		RunAsUser: securityv1.RunAsUserStrategyOptions{
 			Type: securityv1.RunAsUserStrategyMustRunAs,
-			UID:  &cr.Spec.UUID,
+			UID:  &uuid,
 		},
 		SELinuxContext: securityv1.SELinuxContextStrategyOptions{
 			Type: securityv1.SELinuxStrategyMustRunAs,
@@ -207,8 +220,8 @@ func (r *ReconcileNamespaceSCC) newSCCForNS(cr *namespacesccv1alpha1.NamespaceSC
 			Type: securityv1.SupplementalGroupsStrategyRunAsAny,
 			Ranges: []securityv1.IDRange{
 				securityv1.IDRange{
-					Min: cr.Spec.UUID,
-					Max: cr.Spec.UUID,
+					Min: uuid,
+					Max: uuid,
 				},
 			},
 		},

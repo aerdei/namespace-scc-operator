@@ -29,13 +29,13 @@ spec:
           description: NamespaceSCCSpec defines the desired state of NamespaceSCC
           properties:
             sccPriority:
-              format: int32
+              format: int64
             uuid:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 Important: Run "operator-sdk generate k8s" to regenerate code after
                 modifying this file Add custom validation using kubebuilder tags:
                 https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
-              format: int32
+              format: int64
             whiteList:
               items:
           required:
