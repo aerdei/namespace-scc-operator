@@ -10,7 +10,7 @@ metadata:
   name: namespace-scc-operator
 spec:
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   selector:
     app: namespace-scc-operator
     deploymentconfig: namespace-scc-operator
@@ -36,7 +36,6 @@ spec:
       containers:
       - env:
         - name: WATCH_NAMESPACE
-        - name: STORAGE_UID
           value: ""
         - name: POD_NAME
           valueFrom:

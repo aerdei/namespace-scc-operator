@@ -1,0 +1,16 @@
+apiVersion: namespacescc.github.com/v1alpha1
+kind: NamespaceSCC
+metadata:
+  name: test-scc
+spec:
+  uuid: 123123
+  sccPriority: 55
+  whiteList:
+  - "openshift"
+  - "openshift-apiserver"
+  - "openshift-controller-manager"
+  - "openshift-core-operators"
+  - "openshift-infra"
+  - "openshift-node"
+  - "openshift-service-cert-signer"
+  - "openshift-web-console"
