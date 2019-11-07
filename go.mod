@@ -1,7 +1,6 @@
 module github.com/aerdei/namespace-scc-operator
 
 require (
-	github.com/NYTimes/gziphandler v1.0.1 // indirect
 	github.com/go-openapi/spec v0.19.0
 	github.com/google/go-cmp v0.2.0
 	github.com/openshift/api v3.9.0+incompatible
