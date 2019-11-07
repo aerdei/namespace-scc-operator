@@ -1,0 +1,13 @@
+apiVersion: authorization.openshift.io/v1
+groupNames: null
+kind: ClusterRoleBinding
+metadata:
+  name: namespace-scc-operator
+roleRef:
+  name: namespace-scc-operator
+subjects:
+- kind: ServiceAccount
+  name: namespace-scc-operator
+  namespace: namespace-scc-operator
+userNames:
+- system:serviceaccount:namespace-scc-operator:namespace-scc-operator
