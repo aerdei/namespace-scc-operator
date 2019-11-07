@@ -36,3 +36,12 @@ rules:
   - securitycontextconstraints
   verbs:
   - '*'
+- apiGroups:
+  - "namespacescc.github.com"
+  resources:
+  - namespacesccs
+  verbs:
+  - list
+  - get
+  - watch
+
