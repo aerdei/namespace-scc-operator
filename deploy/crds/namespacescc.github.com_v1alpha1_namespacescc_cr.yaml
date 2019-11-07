@@ -1,0 +1,7 @@
+apiVersion: namespacescc.github.com/v1alpha1
+kind: NamespaceSCC
+metadata:
+  name: example-namespacescc
+spec:
+  # Add fields here
+  size: 3
