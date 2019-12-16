@@ -11,10 +11,23 @@ rules:
   - configmaps
   - namespaces
   - pods
+  - replicationcontrollers
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - deploymentconfigs
+  verbs:
+  - get
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - deploymentconfigs/finalizers
+  verbs:
+  - update
 - apiGroups:
   - ""
   attributeRestrictions: null
@@ -27,6 +40,7 @@ rules:
   attributeRestrictions: null
   resources:
   - configmaps
+  - services
   verbs:
   - create
 - apiGroups:
@@ -44,4 +58,3 @@ rules:
   - list
   - get
   - watch
-
