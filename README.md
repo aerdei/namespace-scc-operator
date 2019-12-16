@@ -9,12 +9,14 @@ kind: NamespaceSCC
 metadata:
   name: test-scc
 spec:
+  serviceAccount: "test-sa"
   uuid: 123123123
   sccPriority: 55
   whiteList:
   - "openshift-apiserver"
   - "openshift-console"
 ```
+`serviceAccount`: The serviceAccount name the SCC *users* field will be configured with  
 `uuid`: The UUID the SCC will be configured with  
 `sccPriority`: the priority the SCC will be configured with  
 `whiteList`: no SCC will be created for the namespaces in the list  
@@ -54,8 +56,8 @@ apiVersion: security.openshift.io/v1
 defaultAddCapabilities: null
 fsGroup:
   ranges:
-  - max: <uuid>
-    min: <uuid>
+  - max: <cr.uuid>
+    min: <cr.uuid>
   type: MustRunAs
 groups:
 - mapr-sas
@@ -63,14 +65,14 @@ kind: SecurityContextConstraints
 metadata:
   labels:
     namespace: <namespace>
-  name: <namespacescc>-<namespace>
+  name: <cr.name>-<namespace>
   ownerReferences:
   - apiVersion: v1
     blockOwnerDeletion: true
     controller: true
     kind: Namespace
     name: <namespace>
-priority: <sccPriority>
+priority: <cr.sccPriority>
 readOnlyRootFilesystem: false
 requiredDropCapabilities:
 - KILL
@@ -88,7 +90,7 @@ supplementalGroups:
     min: <uuid>
   type: RunAsAny
 users:
-- system:serviceaccount:<project>:default
+- system:serviceaccount:<namespace>:<cr.serviceAccount>
 volumes:
 - configMap
 - downwardAPI
