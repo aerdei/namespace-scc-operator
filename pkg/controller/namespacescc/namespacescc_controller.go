@@ -107,7 +107,6 @@ func (r *ReconcileNamespaceSCC) Reconcile(request reconcile.Request) (reconcile.
 		reqLogger.Info("Error reading the object")
 		return reconcile.Result{}, err
 	}
-	//reqLogger.Info(fmt.Sprintf("%s", sccList))
 
 	// Fetch the Namespace list
 	nsList := &corev1.NamespaceList{}
@@ -123,7 +122,6 @@ func (r *ReconcileNamespaceSCC) Reconcile(request reconcile.Request) (reconcile.
 		reqLogger.Info("Error reading the object")
 		return reconcile.Result{}, err
 	}
-	//reqLogger.Info(fmt.Sprintf("%s", nsList))
 
 	// For every SCC, check if every namespace has a corresponding scc. If not, create one. If present but differs, update.
 	for _, sccElement := range sccList.Items {
@@ -162,12 +160,10 @@ func (r *ReconcileNamespaceSCC) Reconcile(request reconcile.Request) (reconcile.
 						reqLogger.Error(err, "Failed to update SCC")
 						return reconcile.Result{}, err
 					}
-					//return reconcile.Result{}, nil
 				}
 			}
 		}
 	}
-	// Pod already exists - don't requeue
 	return reconcile.Result{}, nil
 }
 
@@ -230,7 +226,7 @@ func (r *ReconcileNamespaceSCC) newSCCForNS(cr *namespacesccv1alpha1.NamespaceSC
 			securityv1.FSProjected,
 			securityv1.FSTypeSecret,
 		},
-		Users:  []string{"system:serviceaccount:" + ns.Name + ":default"},
+		Users:  []string{"system:serviceaccount:" + ns.Name + ":" + cr.Spec.ServiceAccount},
 		Groups: []string{"mapr-sas"},
 	}
 	controllerutil.SetControllerReference(ns, scc, r.scheme)
