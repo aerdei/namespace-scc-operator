@@ -16,7 +16,8 @@ type NamespaceSCCSpec struct {
 	UUID        int32 `json:"uuid"`
 	SccPriority int32 `json:"sccPriority"`
 	// +listType=set
-	WhiteList []string `json:"whiteList"`
+	WhiteList      []string `json:"whiteList"`
+	ServiceAccount string   `json:"serviceAccount"`
 }
 
 // NamespaceSCCStatus defines the observed state of NamespaceSCC

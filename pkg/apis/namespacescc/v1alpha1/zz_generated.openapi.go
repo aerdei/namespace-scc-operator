@@ -97,8 +97,14 @@ func schema_pkg_apis_namespacescc_v1alpha1_NamespaceSCCSpec(ref common.Reference
 							},
 						},
 					},
+					"serviceAccount": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 				},
-				Required: []string{"uuid", "sccPriority", "whiteList"},
+				Required: []string{"uuid", "sccPriority", "whiteList", "serviceAccount"},
 			},
 		},
 		Dependencies: []string{},
