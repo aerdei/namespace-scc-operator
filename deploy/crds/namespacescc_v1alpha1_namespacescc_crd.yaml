@@ -32,6 +32,8 @@ spec:
             sccPriority:
               format: int32
               type: integer
+            serviceAccount:
+              type: string
             uuid:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 Important: Run "operator-sdk generate k8s" to regenerate code after
@@ -48,6 +50,7 @@ spec:
           - uuid
           - sccPriority
           - whiteList
+          - serviceAccount
           type: object
         status:
           type: object
