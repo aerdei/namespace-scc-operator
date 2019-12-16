@@ -3,6 +3,7 @@ kind: NamespaceSCC
 metadata:
   name: test-scc
 spec:
+  serviceAccount: "example-sa"
   uuid: 123123
   sccPriority: 55
   whiteList:
